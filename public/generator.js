@@ -657,6 +657,8 @@ function assemblePostHtml() {
           </p>`;
         }
       });
+      // Blogger Jump Break: isolates homepage teaser card from full article body
+      assembledHtml += `\n\n  <!--more-->\n`;
       return;
     }
 

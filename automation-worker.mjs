@@ -277,6 +277,9 @@ export function assembleBloggerHtml(articleData) {
     </p>
   </div>
 
+  <!-- Blogger Jump Break: separates homepage summary card from full post body -->
+  <!--more-->
+
   <!-- Article Body -->
   <div class="esc-article-body">
     <p style="margin-bottom:18px; line-height:1.75; color:#334155; font-size:16px;">

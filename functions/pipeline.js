@@ -225,6 +225,9 @@ function assembleBloggerHtml(articleData) {
     </p>
   </div>
 
+  <!-- Blogger Jump Break: isolates teaser preview from full article body -->
+  <!--more-->
+
   <div class="esc-article-body">
     <p style="margin-bottom:18px; line-height:1.75; color:#334155; font-size:16px;">
       ${contentHtml}

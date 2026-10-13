@@ -11,6 +11,8 @@ firebase-debug.log*
 # Environment Variables & Tokens
 .env
 .env.*
+!.env.example
+!functions/.env.example
 *.local
 credentials.json
 service-account*.json

@@ -1,0 +1,38 @@
+name: 24/7 Daily Autonomous Blog Publisher
+
+on:
+  schedule:
+    # Runs EVERY DAY at 09:00 UTC (2:00 PM PKT / 5:00 AM EDT)
+    - cron: '0 9 * * *'
+  workflow_dispatch: # Allows manual 1-click trigger from GitHub web UI anytime
+
+jobs:
+  publish_daily_blog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install --omit=dev
+
+      - name: Execute Daily Autonomous Publisher & Dispatch Email
+        env:
+          BLOGGER_BLOG_ID: ${{ secrets.BLOGGER_BLOG_ID || '1753031768743392930' }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          BLOGGER_CLIENT_ID: ${{ secrets.BLOGGER_CLIENT_ID }}
+          BLOGGER_CLIENT_SECRET: ${{ secrets.BLOGGER_CLIENT_SECRET }}
+          BLOGGER_REFRESH_TOKEN: ${{ secrets.BLOGGER_REFRESH_TOKEN }}
+          NOTIFICATION_EMAIL: ${{ secrets.NOTIFICATION_EMAIL || 'engr.mohsin.javaid@gmail.com' }}
+          SMTP_USER: ${{ secrets.SMTP_USER || 'engr.mohsin.javaid@gmail.com' }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+        run: node automation-worker.mjs

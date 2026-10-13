@@ -16,8 +16,14 @@ import {
   selectTopic,
   unselectTopic,
   toggleTopicSelection,
-  getExistingBlogTopics
+  getExistingBlogTopics,
+  addGeminiTopics
 } from "./trending-topics.js";
+
+import {
+  isGeminiAvailable,
+  generateTrendingTopicsWithGemini
+} from "./gemini-service.js";
 
 ﻿/**
  * Engineer'sSideCorner - Firebase Admin Portal
@@ -454,6 +460,7 @@ if (isConfigured) {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     googleProvider = new GoogleAuthProvider();
+    googleProvider.addScope("https://www.googleapis.com/auth/blogger");
     googleProvider.setCustomParameters({ prompt: "select_account" });
 
     // Auth state listener
@@ -500,11 +507,16 @@ if (isConfigured) {
       }
     });
 
-    // Google Sign-In
+    // Google Sign-In with Blogger OAuth token capture
     btnGoogleLogin.addEventListener("click", async () => {
       clearError();
       try {
-        await signInWithPopup(auth, googleProvider);
+        const result = await signInWithPopup(auth, googleProvider);
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        if (credential?.accessToken) {
+          sessionStorage.setItem("esc_blogger_access_token", credential.accessToken);
+          localStorage.setItem("esc_blogger_access_token", credential.accessToken);
+        }
       } catch (error) {
         console.error("Google sign-in error:", error);
         displayError(getFriendlyAuthErrorMessage(error.code));
@@ -626,6 +638,12 @@ function renderSelectedQueueBox() {
   if (selectedQueueBadge) selectedQueueBadge.textContent = `${selectedTopics.length} In Queue`;
 
   const leadTopic = selectedTopics[0];
+  const btnLaunchGen = document.getElementById("btn-launch-generator");
+  const btnAutopilotQueue = document.getElementById("btn-launch-generator-autopilot");
+  if (leadTopic) {
+    if (btnLaunchGen) btnLaunchGen.href = `./generator.html?topic=${leadTopic.id}`;
+    if (btnAutopilotQueue) btnAutopilotQueue.href = `./generator.html?topic=${leadTopic.id}&autopilot=true`;
+  }
   if (selectedTopicDetails) {
     selectedTopicDetails.innerHTML = `
       <div class="col-span-1 md:col-span-2 space-y-2">
@@ -658,6 +676,41 @@ function renderSelectedQueueBox() {
       </div>
     `;
   }
+}
+
+// Gemini AI Topic Discovery Button
+const btnGeminiDiscover = document.getElementById("btn-gemini-discover-topics");
+
+if (btnGeminiDiscover) {
+  btnGeminiDiscover.addEventListener("click", async () => {
+    if (!isGeminiAvailable()) {
+      showToast("Gemini API key is not configured.");
+      return;
+    }
+
+    const origHtml = btnGeminiDiscover.innerHTML;
+    btnGeminiDiscover.disabled = true;
+    btnGeminiDiscover.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> <span>Gemini Brainstorming...</span>`;
+
+    try {
+      const existingTitles = allBlogPosts.map(p => p.title);
+      const newGeminiTopics = await generateTrendingTopicsWithGemini(existingTitles);
+      
+      if (newGeminiTopics && newGeminiTopics.length > 0) {
+        addGeminiTopics(newGeminiTopics);
+        renderTrendingRadar();
+        showToast(`✨ Gemini discovered ${newGeminiTopics.length} fresh trending topics!`);
+      } else {
+        showToast("Gemini did not return any topics.");
+      }
+    } catch (err) {
+      console.error("Gemini discovery error:", err);
+      showToast("Gemini discovery notice: " + err.message);
+    } finally {
+      btnGeminiDiscover.disabled = false;
+      btnGeminiDiscover.innerHTML = origHtml;
+    }
+  });
 }
 
 function renderTrendingRadar() {
@@ -783,19 +836,30 @@ function renderTrendingRadar() {
       `;
     } else {
       actionButton = `
-        <div class="mt-4 pt-3 border-t border-slate-800/60 flex items-center gap-2">
-          <button onclick="window.selectTrendingTopic('${topic.id}')" class="flex-1 btn-primary py-2 px-3 rounded-xl text-xs font-semibold text-white cursor-pointer flex items-center justify-center gap-1.5">
-            <span>Select for Next Post</span>
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-            </svg>
+        <div class="mt-4 pt-3 border-t border-slate-800/60 flex flex-col sm:flex-row items-center gap-2">
+          <button onclick="window.selectTrendingTopic('${topic.id}')" class="w-full sm:flex-1 py-2 px-3 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-slate-900 border border-slate-700/80 cursor-pointer flex items-center justify-center gap-1.5 transition-colors">
+            <span>Select Queue</span>
           </button>
+          <a href="./generator.html?topic=${topic.id}&autopilot=true" class="w-full sm:flex-1 btn-primary py-2 px-3 rounded-xl text-xs font-bold text-white cursor-pointer flex items-center justify-center gap-1.5 shadow-lg bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-400 hover:to-indigo-500">
+            <svg class="w-3 h-3 text-amber-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+            <span>1-Click Publish</span>
+          </a>
         </div>
       `;
     }
 
+    const thumbImgHtml = topic.thumbnailUrl ? `
+      <div class="mb-3.5 rounded-xl overflow-hidden aspect-[16/9] w-full bg-slate-900 border border-slate-800/80 relative group shadow-md">
+        <img src="${topic.thumbnailUrl}" alt="${escapeHtml(topic.title)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
+        <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-black/80 backdrop-blur-md text-[9px] font-mono text-indigo-300 border border-indigo-500/30 font-bold">16:9 AI Visual</span>
+      </div>
+    ` : '';
+
     card.innerHTML = `
       <div>
+        ${thumbImgHtml}
         <div class="flex items-center justify-between gap-2 mb-2.5">
           <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400 font-mono">${escapeHtml(topic.category)}</span>
           ${statusBadge}

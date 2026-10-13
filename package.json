@@ -1,0 +1,14 @@
+{
+  "name": "blogger-automation",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "24/7 Autonomous Blogger Publishing Engine",
+  "main": "automation-worker.mjs",
+  "scripts": {
+    "start": "node automation-worker.mjs",
+    "publish": "node automation-worker.mjs"
+  },
+  "dependencies": {
+    "nodemailer": "^6.10.1"
+  }
+}

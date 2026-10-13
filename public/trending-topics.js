@@ -14,6 +14,7 @@
 export const TRENDING_TECH_CATALOG = [
   {
     id: "ai-multi-agent-orchestration",
+    thumbnailUrl: "https://image.pollinations.ai/prompt/Autonomous%20Multi%20Agent%20AI%20Systems%203D%20isometric%20neural%20cluster%2016x9%20tech%20editorial?width=800&height=450&nologo=true",
     title: "Autonomous Multi-Agent AI Systems: Orchestration & Production Patterns",
     category: "Artificial Intelligence",
     searchVolume: "110K searches/mo",
@@ -32,6 +33,7 @@ export const TRENDING_TECH_CATALOG = [
   },
   {
     id: "rust-systems-embedded",
+    thumbnailUrl: "https://image.pollinations.ai/prompt/Rust%20programming%20kernel%20low%20latency%20memory%20safety%20copper%20crab%20microchip%2016x9?width=800&height=450&nologo=true",
     title: "Why Rust is Displacing C/C++ in Kernel & Low-Latency Systems",
     category: "Software Architecture",
     searchVolume: "84K searches/mo",
@@ -409,4 +411,20 @@ export function getExistingBlogTopics(publishedPosts = []) {
     name,
     count
   }));
+}
+
+// Dynamic Gemini topic injector
+export function addGeminiTopics(newTopics) {
+  if (!Array.isArray(newTopics)) return;
+  newTopics.forEach(t => {
+    if (!t.id) {
+      t.id = 'gemini-' + t.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
+    }
+    t.badge = '✨ Gemini AI Trend';
+    t.trendScore = t.trendScore || 99;
+    // Prepend if not exists
+    if (!TRENDING_TECH_CATALOG.find(existing => existing.id === t.id)) {
+      TRENDING_TECH_CATALOG.unshift(t);
+    }
+  });
 }

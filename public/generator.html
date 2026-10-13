@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Article Studio & Publisher | Engineer'sSideCorner</title>
+  <meta name="description" content="Step-by-step article generator, image synthesizer, and Blogger publishing studio for Engineer'sSideCorner.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body class="bg-[#090d16] text-slate-100 min-h-screen relative flex flex-col font-sans select-none pb-28">
+
+  <!-- Atmospheric Ambient Glows -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-glow glow-3"></div>
+  <div class="fixed inset-0 bg-grid-pattern pointer-events-none z-0"></div>
+
+  <!-- Header Navigation -->
+  <header class="glass-nav sticky top-0 z-30 px-4 sm:px-8 py-3.5 flex items-center justify-between border-b border-white/5">
+    <div class="flex items-center space-x-3">
+      <a href="./index.html" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/80 transition-colors flex items-center gap-1.5 text-xs font-semibold" title="Back to Dashboard">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span class="hidden sm:inline">Dashboard</span>
+      </a>
+      <div class="h-5 w-px bg-slate-800"></div>
+      <div>
+        <h1 class="text-sm font-bold tracking-tight text-white leading-tight flex items-center gap-2">
+          <span>Article Studio &amp; Publisher</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Step-by-Step</span>
+        </h1>
+        <p class="text-[10px] text-indigo-400 font-mono uppercase tracking-wider">Engineer'sSideCorner Pipeline</p>
+      </div>
+    </div>
+
+    <!-- Active Topic Pill -->
+    <div class="flex items-center space-x-3">
+      <div id="header-topic-chip" class="max-w-xs sm:max-w-md truncate px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs text-slate-300 hidden sm:flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span id="header-topic-title" class="truncate font-medium">Select a Topic...</span>
+      </div>
+      <button id="btn-start-autopilot" type="button" class="px-4 py-1.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-amber-500 via-emerald-500 to-indigo-600 hover:from-amber-400 hover:to-indigo-500 flex items-center gap-1.5 cursor-pointer shadow-lg shadow-amber-500/20 transition-all hover:scale-105 animate-pulse">
+        <i class="fa-solid fa-bolt text-amber-200"></i>
+        <span>1-Click Autopilot</span>
+      </button>
+      <a href="https://engineersidecorner.blogspot.com/" target="_blank" rel="noopener noreferrer" class="p-2 rounded-xl bg-slate-800/80 hover:bg-indigo-950/40 text-slate-300 hover:text-indigo-300 border border-slate-700 transition-colors text-xs" title="View Live Blog">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Multi-Step Stepper Bar -->
+  <nav class="sticky top-[57px] z-20 bg-[#0c101d]/90 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-8 py-3 overflow-x-auto">
+    <div class="max-w-5xl mx-auto flex items-center justify-between min-w-[620px] text-xs">
+      
+      <button onclick="window.goToStep(1)" class="step-nav-btn active flex items-center gap-2 font-semibold text-indigo-400" id="step-btn-1">
+        <span class="step-num w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[11px] font-bold">1</span>
+        <span>Prompt &amp; Draft</span>
+      </button>
+      <div class="h-0.5 w-6 bg-slate-800" id="step-line-1"></div>
+
+      <button onclick="window.goToStep(2)" class="step-nav-btn flex items-center gap-2 font-medium text-slate-400 hover:text-slate-200" id="step-btn-2">
+        <span class="step-num w-6 h-6 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center text-[11px] font-bold">2</span>
+        <span>Thumbnail</span>
+      </button>
+      <div class="h-0.5 w-6 bg-slate-800" id="step-line-2"></div>
+
+      <button onclick="window.goToStep(3)" class="step-nav-btn flex items-center gap-2 font-medium text-slate-400 hover:text-slate-200" id="step-btn-3">
+        <span class="step-num w-6 h-6 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center text-[11px] font-bold">3</span>
+        <span>In-Article Visuals</span>
+      </button>
+      <div class="h-0.5 w-6 bg-slate-800" id="step-line-3"></div>
+
+      <button onclick="window.goToStep(4)" class="step-nav-btn flex items-center gap-2 font-medium text-slate-400 hover:text-slate-200" id="step-btn-4">
+        <span class="step-num w-6 h-6 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center text-[11px] font-bold">4</span>
+        <span>Assembly</span>
+      </button>
+      <div class="h-0.5 w-6 bg-slate-800" id="step-line-4"></div>
+
+      <button onclick="window.goToStep(5)" class="step-nav-btn flex items-center gap-2 font-medium text-slate-400 hover:text-slate-200" id="step-btn-5">
+        <span class="step-num w-6 h-6 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center text-[11px] font-bold">5</span>
+        <span>SEO Audit</span>
+      </button>
+      <div class="h-0.5 w-6 bg-slate-800" id="step-line-5"></div>
+
+      <button onclick="window.goToStep(6)" class="step-nav-btn flex items-center gap-2 font-medium text-slate-400 hover:text-slate-200" id="step-btn-6">
+        <span class="step-num w-6 h-6 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center text-[11px] font-bold">6</span>
+        <span>Publish to Blogger</span>
+      </button>
+
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="relative z-10 flex-1 max-w-5xl w-full mx-auto p-4 sm:p-8">
+
+    <!-- ============================================================== -->
+    <!-- STEP 1: CONTENT PROMPT & DRAFT GENERATION                      -->
+    <!-- ============================================================== -->
+    <section id="step-panel-1" class="step-panel glass-panel rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-2xl border border-white/10 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-800/80">
+        <div>
+          <span class="text-[10px] font-mono uppercase tracking-widest text-indigo-400 font-bold block">Step 01 / 06</span>
+          <h2 class="text-xl sm:text-2xl font-black text-white mt-0.5">Content Prompt &amp; Draft Synthesis</h2>
+          <p class="text-xs text-slate-400 mt-1">Generate a high-authority engineering prompt and synthesize the complete article draft.</p>
+        </div>
+        <button id="btn-auto-generate-draft" class="btn-primary px-5 py-2.5 rounded-xl font-bold text-xs text-white flex items-center justify-center gap-2 cursor-pointer shadow-lg shrink-0">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span id="btn-draft-text">Auto-Draft Article</span>
+          <div id="btn-draft-spinner" class="hidden w-3.5 h-3.5 rounded-full border-2 border-white/20 border-t-white animate-spin"></div>
+        </button>
+      </div>
+
+      <!-- Active Topic Card -->
+      <div class="p-4 rounded-xl bg-slate-950/50 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2 mb-1.5">
+            <span id="step1-topic-cat" class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">AI &amp; Machine Learning</span>
+            <span id="step1-topic-vol" class="text-slate-400 font-mono text-[11px]">110K searches/mo</span>
+          </div>
+          <h3 id="step1-topic-title" class="text-base font-bold text-white">Autonomous Multi-Agent AI Systems: Orchestration &amp; Production Patterns</h3>
+          <p id="step1-topic-summary" class="text-xs text-slate-400 mt-1">Deep dive into production architectures, state persistence, and deterministic evals.</p>
+        </div>
+        <button onclick="window.location.href='./index.html'" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white bg-slate-900 border border-slate-800 shrink-0">
+          Change Topic
+        </button>
+      </div>
+
+      <!-- Prompt Editor Box -->
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <label class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+            <i class="fa-solid fa-terminal text-indigo-400"></i>
+            <span>Engineered Prompt for LLM Content Generation</span>
+          </label>
+          <button id="btn-copy-raw-prompt" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-medium">
+            <i class="fa-regular fa-copy"></i> Copy Prompt
+          </button>
+        </div>
+        <textarea id="prompt-editor" rows="5" class="w-full glass-input rounded-xl p-3.5 text-xs text-slate-200 font-mono outline-none leading-relaxed"></textarea>
+      </div>
+
+      <!-- Generated Article Draft Section -->
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-3">
+            <label class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+              <i class="fa-solid fa-file-lines text-indigo-400"></i>
+              <span>Article Draft Content (Markdown)</span>
+            </label>
+            <span id="draft-word-count" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400">0 words</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button id="tab-draft-markdown" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white">Markdown</button>
+            <button id="tab-draft-preview" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-900 text-slate-400 hover:text-slate-200">Live Preview</button>
+          </div>
+        </div>
+
+        <div id="draft-editor-view">
+          <textarea id="draft-content-editor" rows="14" class="w-full glass-input rounded-xl p-4 text-xs text-slate-200 font-mono outline-none leading-relaxed" placeholder="Click 'Auto-Draft Article' or paste your drafted content here..."></textarea>
+        </div>
+
+        <div id="draft-preview-view" class="hidden p-6 rounded-xl bg-slate-950/70 border border-slate-800 text-slate-200 text-sm max-h-[420px] overflow-y-auto space-y-4">
+          <!-- Rendered Markdown will appear here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- STEP 2: FEATURED THUMBNAIL CREATION                            -->
+    <!-- ============================================================== -->
+    <section id="step-panel-2" class="step-panel hidden glass-panel rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-2xl border border-white/10 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-800/80">
+        <div>
+          <span class="text-[10px] font-mono uppercase tracking-widest text-indigo-400 font-bold block">Step 02 / 06</span>
+          <h2 class="text-xl sm:text-2xl font-black text-white mt-0.5">Featured Thumbnail Generation</h2>
+          <p class="text-xs text-slate-400 mt-1">Create a high-impact, 16:9 thumbnail tailored for technical readers and social sharing.</p>
+        </div>
+        <button id="btn-regenerate-thumb-suggestions" class="btn-primary px-4 py-2 rounded-xl font-bold text-xs text-white flex items-center justify-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-arrows-rotate"></i>
+          <span>Shuffle Thumbnail Options</span>
+        </button>
+      </div>
+
+      <!-- Thumbnail Preview & Active URL -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+        <!-- Visual Display Card -->
+        <div class="space-y-3">
+          <span class="text-xs font-bold text-slate-300 block">Current Featured Thumbnail (16:9)</span>
+          <div class="relative w-full aspect-video rounded-2xl overflow-hidden border border-slate-700 bg-slate-950 shadow-xl group">
+            <img id="active-thumbnail-img" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&auto=format&fit=crop&q=80" alt="Featured Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-4">
+              <span id="thumbnail-overlay-badge" class="self-start px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-600 text-white mb-1.5 uppercase tracking-wider">AI &amp; Tech</span>
+              <p id="thumbnail-overlay-title" class="text-sm font-bold text-white line-clamp-2">Autonomous Multi-Agent AI Systems</p>
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-400 italic">This image will appear at the top of your post and on Blogger's index cards.</p>
+        </div>
+
+        <!-- Thumbnail Controls -->
+        <div class="space-y-4">
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1.5">Direct Image URL</label>
+            <div class="flex gap-2">
+              <input id="input-thumbnail-url" type="url" class="flex-1 glass-input rounded-xl px-3.5 py-2 text-xs text-slate-200 outline-none" placeholder="https://images.unsplash.com/...">
+              <button id="btn-apply-thumb-url" class="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shrink-0">Apply</button>
+            </div>
+          </div>
+
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-2">Recommended Tech Styles</label>
+            <div id="thumb-options-grid" class="grid grid-cols-3 gap-2.5">
+              <!-- Dynamically rendered thumbnail options -->
+            </div>
+          </div>
+
+          <!-- AI Image Generation Prompt Box -->
+          <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-indigo-300">Midjourney / DALL-E / Imagen Prompt:</span>
+              <button id="btn-copy-ai-img-prompt" class="text-[10px] text-slate-400 hover:text-white underline">Copy</button>
+            </div>
+            <p id="ai-image-prompt-text" class="text-xs font-mono text-slate-300 leading-relaxed">Futuristic high-tech neural network visualization, glowing fiber optic connections, deep indigo and cyber cyan lighting, cinematic 8k wallpaper, 16:9 aspect ratio --ar 16:9 --v 6.0</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- STEP 3: IN-ARTICLE SUPPORTING VISUALS                          -->
+    <!-- ============================================================== -->
+    <section id="step-panel-3" class="step-panel hidden glass-panel rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-2xl border border-white/10 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-800/80">
+        <div>
+          <span class="text-[10px] font-mono uppercase tracking-widest text-indigo-400 font-bold block">Step 03 / 06</span>
+          <h2 class="text-xl sm:text-2xl font-black text-white mt-0.5">In-Article Visuals &amp; Diagrams</h2>
+          <p class="text-xs text-slate-400 mt-1">Add context-specific illustrations, architecture diagrams, and benchmark charts into article sections.</p>
+        </div>
+        <button id="btn-add-visual-item" class="btn-primary px-4 py-2 rounded-xl font-bold text-xs text-white flex items-center justify-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-plus"></i>
+          <span>Add Custom Diagram</span>
+        </button>
+      </div>
+
+      <!-- In-Article Visuals Container -->
+      <div id="in-article-visuals-list" class="space-y-4">
+        <!-- Rendered visual items -->
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- STEP 4: CONTENT & MEDIA ASSEMBLY                               -->
+    <!-- ============================================================== -->
+    <section id="step-panel-4" class="step-panel hidden glass-panel rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-2xl border border-white/10 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-800/80">
+        <div>
+          <span class="text-[10px] font-mono uppercase tracking-widest text-indigo-400 font-bold block">Step 04 / 06</span>
+          <h2 class="text-xl sm:text-2xl font-black text-white mt-0.5">Content &amp; Media Assembly</h2>
+          <p class="text-xs text-slate-400 mt-1">Review the fully merged article with thumbnail, typography, code blocks, and inline visuals.</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="tab-assembly-preview" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white">Visual Preview</button>
+          <button id="tab-assembly-code" class="px-3 py-1.5 rounded-xl text-xs font-medium bg-slate-900 text-slate-400 hover:text-white">HTML Source</button>
+          <button id="btn-copy-assembled-html" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs" title="Copy Assembled HTML">
+            <i class="fa-regular fa-copy"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Assembled Post Viewer -->
+      <div id="assembly-preview-container" class="rounded-2xl border border-slate-800 bg-[#0f172a] p-6 sm:p-10 text-slate-200 max-h-[580px] overflow-y-auto space-y-6">
+        <!-- Merged visual article rendered here -->
+      </div>
+
+      <!-- HTML Code Viewer -->
+      <div id="assembly-code-container" class="hidden">
+        <textarea id="assembled-html-textarea" rows="18" class="w-full glass-input rounded-xl p-4 text-xs text-indigo-300 font-mono outline-none leading-relaxed" readonly></textarea>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- STEP 5: SEO & METADATA OPTIMIZATION                            -->
+    <!-- ============================================================== -->
+    <section id="step-panel-5" class="step-panel hidden glass-panel rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-2xl border border-white/10 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-800/80">
+        <div>
+          <span class="text-[10px] font-mono uppercase tracking-widest text-indigo-400 font-bold block">Step 05 / 06</span>
+          <h2 class="text-xl sm:text-2xl font-black text-white mt-0.5">SEO &amp; Metadata Optimization</h2>
+          <p class="text-xs text-slate-400 mt-1">Maximize Google search rankings, click-through rates, and social card previews.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-bold font-mono flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            SEO Score: <span id="seo-score-display">96/100</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Form Controls -->
+        <div class="space-y-4">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-xs font-bold text-slate-300">SEO Page Title</label>
+              <span id="title-char-count" class="text-[10px] font-mono text-slate-400">0/60</span>
+            </div>
+            <input id="seo-input-title" type="text" class="w-full glass-input rounded-xl px-3.5 py-2 text-xs text-slate-200 outline-none">
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-xs font-bold text-slate-300">Search Meta Description</label>
+              <span id="desc-char-count" class="text-[10px] font-mono text-slate-400">0/155</span>
+            </div>
+            <textarea id="seo-input-desc" rows="3" class="w-full glass-input rounded-xl p-3 text-xs text-slate-200 outline-none leading-relaxed"></textarea>
+          </div>
+
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Custom Permalink Slug</label>
+            <div class="flex items-center rounded-xl bg-slate-950 border border-slate-800 px-3 py-2 text-xs font-mono text-slate-400">
+              <span class="text-slate-600">...blogspot.com/</span>
+              <input id="seo-input-slug" type="text" class="bg-transparent flex-1 text-slate-200 outline-none ml-1">
+              <span class="text-slate-600">.html</span>
+            </div>
+          </div>
+
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Blogger Labels / Tags (Comma separated)</label>
+            <input id="seo-input-labels" type="text" class="w-full glass-input rounded-xl px-3.5 py-2 text-xs text-slate-200 outline-none">
+          </div>
+        </div>
+
+        <!-- Google SERP & Social Previews -->
+        <div class="space-y-4">
+          <label class="text-xs font-bold text-slate-300 block">Google Search Result Preview</label>
+          <div class="p-4 rounded-xl bg-white text-black text-left shadow-lg space-y-1">
+            <div class="flex items-center gap-1.5 text-xs text-[#202124]">
+              <span class="w-4 h-4 rounded-full bg-indigo-600 text-white text-[9px] flex items-center justify-center font-bold">E</span>
+              <span class="text-[#202124] text-[12px] truncate">engineersidecorner.blogspot.com</span>
+            </div>
+            <h4 id="google-preview-title" class="text-base text-[#1a0dab] font-medium leading-snug hover:underline cursor-pointer">
+              Autonomous Multi-Agent AI Systems: Orchestration &amp; Production Patterns
+            </h4>
+            <p id="google-preview-desc" class="text-xs text-[#4d5156] leading-relaxed line-clamp-2">
+              Comprehensive architectural guide on building and orchestrating autonomous multi-agent loops with deterministic evals...
+            </p>
+          </div>
+
+          <label class="text-xs font-bold text-slate-300 block pt-2">Social Card Preview (X / LinkedIn)</label>
+          <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950 shadow-md">
+            <div class="w-full aspect-[2/1] overflow-hidden bg-slate-900">
+              <img id="social-preview-thumb" src="" alt="Social Card" class="w-full h-full object-cover">
+            </div>
+            <div class="p-3 space-y-1 text-xs">
+              <span class="text-[10px] text-slate-500 uppercase font-mono">engineersidecorner.blogspot.com</span>
+              <h5 id="social-preview-title" class="font-bold text-white truncate">Article Title</h5>
+              <p id="social-preview-desc" class="text-slate-400 text-[11px] truncate">Description snippet...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- STEP 6: PUBLISH & EXPORT TO BLOGGER                            -->
+    <!-- ============================================================== -->
+    <section id="step-panel-6" class="step-panel hidden glass-panel rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-2xl border border-white/10 space-y-6">
+      <div class="text-center max-w-xl mx-auto space-y-3 pb-6 border-b border-slate-800/80">
+        <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-emerald-500 to-indigo-600 flex items-center justify-center text-white text-2xl shadow-lg shadow-emerald-500/20">
+          <i class="fa-solid fa-check-double"></i>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-black text-white">Your Article is Ready to Publish!</h2>
+        <p class="text-xs text-slate-400 leading-relaxed">
+          The content, featured thumbnail, inline diagrams, and SEO metadata are fully assembled and formatted for <strong>Engineer'sSideCorner</strong>.
+        </p>
+      </div>
+
+      <!-- 1-Click Online Publish Banner -->
+      <div class="p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-indigo-600/10 border border-emerald-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">ONLINE PUBLISHING</span>
+            <span class="text-xs text-slate-400">Target: engineersidecorner.blogspot.com</span>
+          </div>
+          <h4 class="text-base font-bold text-white">1-Click Live Publish to Google Blogger</h4>
+          <p class="text-xs text-slate-300">Submit this post directly to your live Blogger blog via Google API with 1 click.</p>
+        </div>
+        <button id="btn-publish-online-direct" type="button" class="btn-primary px-6 py-3 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-amber-500 via-emerald-500 to-indigo-600 hover:from-amber-400 hover:to-indigo-500 flex items-center gap-2 shrink-0 shadow-lg shadow-emerald-500/20 cursor-pointer animate-pulse hover:scale-105 transition-all">
+          <i class="fa-solid fa-cloud-arrow-up text-amber-200"></i>
+          <span>Publish Online Now</span>
+        </button>
+      </div>
+
+      <!-- Action Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        
+        <!-- Action 1: 1-Click Copy HTML -->
+        <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 flex flex-col justify-between space-y-4 hover:border-indigo-500/40 transition-colors">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 text-lg mb-3">
+              <i class="fa-solid fa-code"></i>
+            </div>
+            <h4 class="text-sm font-bold text-white">Copy Formatted HTML</h4>
+            <p class="text-xs text-slate-400 mt-1">100% styled HTML code with embedded images, ready to paste directly into Blogger's editor.</p>
+          </div>
+          <button id="btn-final-copy-html" class="w-full btn-primary py-2.5 px-4 rounded-xl text-xs font-bold text-white flex items-center justify-center gap-2 cursor-pointer">
+            <i class="fa-regular fa-copy"></i>
+            <span>Copy Full Post HTML</span>
+          </button>
+        </div>
+
+        <!-- Action 2: Open Blogger Editor -->
+        <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 flex flex-col justify-between space-y-4 hover:border-emerald-500/40 transition-colors">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-lg mb-3">
+              <i class="fa-solid fa-pen-to-square"></i>
+            </div>
+            <h4 class="text-sm font-bold text-white">Open Blogger Editor</h4>
+            <p class="text-xs text-slate-400 mt-1">Direct link to create a new post on Engineer'sSideCorner on Google Blogger.</p>
+          </div>
+          <a id="btn-open-blogger-editor" href="https://www.blogger.com/blog/post/edit/1753031768743392930" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 flex items-center justify-center gap-2 cursor-pointer shadow-lg transition-colors">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            <span>Open in Blogger</span>
+          </a>
+        </div>
+
+        <!-- Action 3: Download Bundle -->
+        <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 flex flex-col justify-between space-y-4 hover:border-purple-500/40 transition-colors">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-lg mb-3">
+              <i class="fa-solid fa-download"></i>
+            </div>
+            <h4 class="text-sm font-bold text-white">Download HTML File</h4>
+            <p class="text-xs text-slate-400 mt-1">Save a standalone local backup `.html` file with metadata and image links.</p>
+          </div>
+          <button id="btn-download-html-file" class="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-purple-600 hover:bg-purple-500 flex items-center justify-center gap-2 cursor-pointer shadow-lg transition-colors">
+            <i class="fa-solid fa-file-arrow-down"></i>
+            <span>Download .html</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Quick Publishing Instructions Checklist -->
+      <div class="p-4 rounded-xl bg-indigo-950/30 border border-indigo-500/20 space-y-2 text-xs">
+        <span class="font-bold text-indigo-300 flex items-center gap-1.5">
+          <i class="fa-solid fa-lightbulb"></i>
+          <span>How to Publish into Blogger (15 Seconds):</span>
+        </span>
+        <ol class="list-decimal list-inside space-y-1 text-slate-300 text-[11px] leading-relaxed">
+          <li>Click <strong>Copy Full Post HTML</strong> above.</li>
+          <li>Click <strong>Open in Blogger</strong> to launch your new post editor on Google Blogger.</li>
+          <li>Switch Blogger editor mode from <em>Compose View</em> to <strong>HTML View</strong> (pencil icon in top left).</li>
+          <li>Paste the copied HTML, enter your Title, paste the Labels, and click <strong>Publish</strong>!</li>
+        </ol>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Sticky Bottom Navigation Bar -->
+  <footer class="fixed bottom-0 left-0 right-0 z-40 bg-[#090d16]/95 backdrop-blur-xl border-t border-slate-800/80 px-4 sm:px-8 py-3.5 shadow-2xl">
+    <div class="max-w-5xl mx-auto flex items-center justify-between">
+      
+      <!-- Back Button -->
+      <button id="btn-prev-step" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white bg-slate-900 border border-slate-800 flex items-center gap-1.5 cursor-pointer transition-colors opacity-50 cursor-not-allowed" disabled>
+        <i class="fa-solid fa-chevron-left"></i>
+        <span>Previous Step</span>
+      </button>
+
+      <!-- Auto-save notification -->
+      <div class="flex items-center gap-2 text-xs text-slate-400 font-mono">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+        <span id="save-status-indicator">All steps saved locally</span>
+      </div>
+
+      <!-- Next Button -->
+      <button id="btn-next-step" class="btn-primary px-6 py-2.5 rounded-xl text-xs font-bold text-white flex items-center gap-2 cursor-pointer shadow-lg">
+        <span id="btn-next-step-text">Next: Thumbnail</span>
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+
+    </div>
+  </footer>
+
+  <!-- Notification Toast -->
+  <div id="toast-notification" class="fixed top-20 right-6 z-50 transform translate-y-[-20px] opacity-0 pointer-events-none transition-all duration-300 px-4 py-3 rounded-xl bg-slate-900 border border-indigo-500/40 text-white text-xs shadow-2xl flex items-center gap-2">
+    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+    <span id="toast-message">Notification message</span>
+  </div>
+
+  
+  <!-- ============================================================== -->
+  <!-- 1-CLICK AUTOPILOT ENGINE & LIVE PUBLISHING MODAL               -->
+  <!-- ============================================================== -->
+  <div id="autopilot-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md hidden transition-all duration-300">
+    <div class="w-full max-w-2xl glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl border border-indigo-500/30 flex flex-col max-h-[90vh]">
+      
+      <!-- Top Glowing Border -->
+      <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 via-emerald-500 to-indigo-600"></div>
+
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-5 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+            <i class="fa-solid fa-bolt text-lg"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+              <span>1-Click Autopilot Publisher</span>
+              <span id="autopilot-status-badge" class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-amber-500/20 text-amber-300 border border-amber-500/30">Running...</span>
+            </h3>
+            <p id="autopilot-modal-subtitle" class="text-xs text-slate-400">Executing full article synthesis &amp; online publishing pipeline...</p>
+          </div>
+        </div>
+        <button id="btn-close-autopilot" type="button" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white transition-colors">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Progress Meter -->
+      <div class="py-5 space-y-2">
+        <div class="flex items-center justify-between text-xs font-mono">
+          <span id="autopilot-step-indicator" class="text-indigo-400 font-semibold">Stage 1 of 6: Content Synthesis</span>
+          <span id="autopilot-percent-indicator" class="text-slate-300 font-bold">16%</span>
+        </div>
+        <div class="w-full h-2 rounded-full bg-slate-900 overflow-hidden border border-slate-800">
+          <div id="autopilot-progress-fill" class="h-full bg-gradient-to-r from-amber-500 via-emerald-500 to-indigo-600 transition-all duration-500" style="width: 16%;"></div>
+        </div>
+      </div>
+
+      <!-- 6-Stage Checklist Visualizer -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 py-2 text-xs">
+        
+        <div id="stage-card-1" class="p-3 rounded-xl bg-slate-950/80 border border-indigo-500/40 text-slate-300 flex items-center gap-2">
+          <span class="stage-icon w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] shrink-0 font-bold">
+            <i class="fa-solid fa-spinner animate-spin"></i>
+          </span>
+          <span class="truncate">1. Content Draft</span>
+        </div>
+
+        <div id="stage-card-2" class="p-3 rounded-xl bg-slate-950/40 border border-slate-800 text-slate-500 flex items-center gap-2">
+          <span class="stage-icon w-5 h-5 rounded-full bg-slate-900 text-slate-500 flex items-center justify-center text-[10px] shrink-0 font-bold">2</span>
+          <span class="truncate">2. 16:9 Thumbnail</span>
+        </div>
+
+        <div id="stage-card-3" class="p-3 rounded-xl bg-slate-950/40 border border-slate-800 text-slate-500 flex items-center gap-2">
+          <span class="stage-icon w-5 h-5 rounded-full bg-slate-900 text-slate-500 flex items-center justify-center text-[10px] shrink-0 font-bold">3</span>
+          <span class="truncate">3. Inline Visuals</span>
+        </div>
+
+        <div id="stage-card-4" class="p-3 rounded-xl bg-slate-950/40 border border-slate-800 text-slate-500 flex items-center gap-2">
+          <span class="stage-icon w-5 h-5 rounded-full bg-slate-900 text-slate-500 flex items-center justify-center text-[10px] shrink-0 font-bold">4</span>
+          <span class="truncate">4. Post Assembly</span>
+        </div>
+
+        <div id="stage-card-5" class="p-3 rounded-xl bg-slate-950/40 border border-slate-800 text-slate-500 flex items-center gap-2">
+          <span class="stage-icon w-5 h-5 rounded-full bg-slate-900 text-slate-500 flex items-center justify-center text-[10px] shrink-0 font-bold">5</span>
+          <span class="truncate">5. SEO Metadata</span>
+        </div>
+
+        <div id="stage-card-6" class="p-3 rounded-xl bg-slate-950/40 border border-slate-800 text-slate-500 flex items-center gap-2">
+          <span class="stage-icon w-5 h-5 rounded-full bg-slate-900 text-slate-500 flex items-center justify-center text-[10px] shrink-0 font-bold">6</span>
+          <span class="truncate">6. Live Publish</span>
+        </div>
+
+      </div>
+
+      <!-- Live Execution Terminal Log -->
+      <div class="mt-4 flex-1 min-h-[140px] max-h-[220px] rounded-2xl bg-black/80 border border-slate-800 p-3.5 font-mono text-[11px] overflow-y-auto space-y-1 text-slate-300">
+        <div id="autopilot-log-stream" class="space-y-1">
+          <p class="text-indigo-400 font-semibold">&gt; Initializing 1-Click Autopilot Engine for Engineer'sSideCorner...</p>
+        </div>
+      </div>
+
+      <!-- OAuth Authorization Prompt (Appears if Blogger token is needed) -->
+      <div id="autopilot-auth-prompt" class="hidden mt-4 p-4 rounded-2xl bg-indigo-950/40 border border-indigo-500/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h4 class="text-xs font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-key text-amber-300"></i>
+            <span>Google Blogger Permission Required</span>
+          </h4>
+          <p class="text-[11px] text-indigo-200 mt-0.5">Click to grant Blogger post permission with your Google account:</p>
+        </div>
+        <button id="btn-authorize-and-resume" class="btn-primary px-4 py-2 rounded-xl text-xs font-bold text-white flex items-center gap-2 shrink-0">
+          <i class="fa-brands fa-google"></i>
+          <span>Authorize &amp; Publish Now</span>
+        </button>
+      </div>
+
+      <!-- Celebration & Completion Screen (Appears on Final Success) -->
+      <div id="autopilot-success-view" class="hidden mt-4 p-5 rounded-2xl bg-emerald-950/30 border border-emerald-500/40 text-center space-y-3">
+        <div class="w-12 h-12 mx-auto rounded-2xl bg-emerald-600 flex items-center justify-center text-white text-xl shadow-lg shadow-emerald-500/30">
+          <i class="fa-solid fa-check"></i>
+        </div>
+        <h4 class="text-lg font-black text-white">🎉 Blog Post Successfully Published Online!</h4>
+        <p class="text-xs text-slate-300 max-w-md mx-auto">
+          Your article is now live on <strong class="text-emerald-300">Engineer'sSideCorner</strong> with complete styling, thumbnail, and SEO metadata.
+        </p>
+
+        <div class="pt-2 flex flex-wrap items-center justify-center gap-3">
+          <a id="btn-view-published-live" href="https://engineersidecorner.blogspot.com/" target="_blank" rel="noopener noreferrer" class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 flex items-center gap-2 shadow-lg cursor-pointer">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            <span>View Live Post Online</span>
+          </a>
+          <button id="btn-copy-live-link" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-200 bg-slate-900 border border-slate-700 hover:text-white flex items-center gap-2 cursor-pointer">
+            <i class="fa-solid fa-link"></i>
+            <span>Copy Link</span>
+          </button>
+          <button onclick="document.getElementById('autopilot-modal').classList.add('hidden')" class="px-4 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white bg-transparent">
+            Close
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Studio Controller Script -->
+  <script type="module" src="./generator.js"></script>
+
+</body>
+</html>

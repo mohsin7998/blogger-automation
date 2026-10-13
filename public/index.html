@@ -264,6 +264,160 @@
           </div>
         </div>
 
+        
+        <!-- ============================================== -->
+        <!-- TRENDING TOPICS RADAR & SELECTION              -->
+        <!-- ============================================== -->
+        <section class="glass-panel rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-2xl border border-white/10">
+          
+          <!-- Subtle Top Gradient Edge -->
+          <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-indigo-500 to-cyan-400"></div>
+
+          <!-- Section Header & Topic Radar Stats -->
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-800/80">
+            <div>
+              <div class="flex flex-wrap items-center gap-2.5">
+                <span class="px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                  Trending Radar
+                </span>
+                <h4 class="text-xl sm:text-2xl font-black text-white tracking-tight">
+                  Next Article Opportunities
+                </h4>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-400 mt-1.5 max-w-2xl leading-relaxed">
+                High-demand technology topics curated for <span class="text-indigo-300 font-medium">Engineer'sSideCorner</span>. The deduplication engine automatically detects topics already covered on your blog and prevents duplicate selections.
+              </p>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="flex flex-wrap items-center gap-3 text-xs font-mono">
+              <div class="px-3 py-2 rounded-xl bg-slate-950/60 border border-slate-800 text-slate-300 flex items-center gap-2">
+                <span class="text-slate-500">Total Analyzed:</span>
+                <span id="radar-stat-total" class="font-bold text-white">0</span>
+              </div>
+              <div class="px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 flex items-center gap-2">
+                <span>Fresh Ideas:</span>
+                <span id="radar-stat-fresh" class="font-bold text-emerald-400">0</span>
+              </div>
+              <div class="px-3 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 flex items-center gap-2">
+                <span>Already Covered:</span>
+                <span id="radar-stat-covered" class="font-bold text-rose-400">0</span>
+              </div>
+              <div class="px-3 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 flex items-center gap-2">
+                <span>Selected Queue:</span>
+                <span id="radar-stat-selected" class="font-bold text-indigo-400">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Selection Banner (Shows if topics are selected in queue) -->
+          <div id="selected-topic-queue-box" class="hidden mt-6 p-5 rounded-2xl bg-gradient-to-r from-indigo-950/40 via-purple-950/20 to-slate-900/60 border border-indigo-500/30 relative overflow-hidden transition-all duration-300">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-indigo-500/20">
+              <div class="flex items-center gap-2.5">
+                <span class="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-xs font-bold">
+                  ✓
+                </span>
+                <div>
+                  <h5 class="text-sm font-bold text-white flex items-center gap-2">
+                    <span>Topic Queued for Next Post</span>
+                    <span id="selected-queue-badge" class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">1 Active</span>
+                  </h5>
+                  <p class="text-xs text-indigo-200/70">Ready to draft for Engineer'sSideCorner.</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button id="btn-copy-topic-prompt" type="button" class="btn-primary px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white flex items-center gap-1.5 cursor-pointer">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                  </svg>
+                  <span>Copy AI Draft Prompt</span>
+                </button>
+                <button id="btn-clear-queue" type="button" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-rose-300 bg-slate-900/60 hover:bg-rose-950/30 border border-slate-800 transition-colors cursor-pointer">
+                  Clear Queue
+                </button>
+              </div>
+            </div>
+            
+            <div id="selected-topic-details" class="pt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+              <!-- Injected dynamically -->
+            </div>
+          </div>
+
+          <!-- Existing Topics Cloud (Detected from Live Blog) -->
+          <div class="mt-6 p-4 rounded-xl bg-slate-950/40 border border-slate-800/80">
+            <div class="flex items-center justify-between text-xs mb-2.5">
+              <span class="font-semibold text-slate-300 flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                </svg>
+                <span>Existing Blog Topics Detected on Engineer'sSideCorner</span>
+              </span>
+              <span id="existing-topics-count" class="text-slate-400 font-mono text-[11px]">Scanning blog...</span>
+            </div>
+            <div id="existing-topics-cloud" class="flex flex-wrap gap-2 text-xs">
+              <!-- Injected badges -->
+            </div>
+          </div>
+
+          <!-- Filter & Controls Toolbar -->
+          <div class="mt-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            
+            <!-- Category Filter Pills -->
+            <div id="radar-category-pills" class="flex flex-wrap items-center gap-2">
+              <button data-cat="all" class="radar-pill active px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white cursor-pointer transition-all">
+                All Topics
+              </button>
+              <button data-cat="Artificial Intelligence" class="radar-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/80 hover:bg-slate-700 text-slate-300 cursor-pointer transition-all">
+                AI &amp; LLMs
+              </button>
+              <button data-cat="Software Architecture" class="radar-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/80 hover:bg-slate-700 text-slate-300 cursor-pointer transition-all">
+                Software Architecture
+              </button>
+              <button data-cat="Robotics & Hardware" class="radar-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/80 hover:bg-slate-700 text-slate-300 cursor-pointer transition-all">
+                Robotics &amp; Hardware
+              </button>
+              <button data-cat="Cybersecurity" class="radar-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/80 hover:bg-slate-700 text-slate-300 cursor-pointer transition-all">
+                Cybersecurity
+              </button>
+              <button data-cat="Cloud & DevOps" class="radar-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/80 hover:bg-slate-700 text-slate-300 cursor-pointer transition-all">
+                Cloud &amp; DevOps
+              </button>
+            </div>
+
+            <!-- Right Controls: Toggle Hide Covered + Search -->
+            <div class="flex items-center gap-3 w-full md:w-auto">
+              <!-- Hide Covered Toggle -->
+              <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer shrink-0 select-none">
+                <input id="toggle-hide-covered" type="checkbox" checked class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                <span>Hide Covered Topics</span>
+              </label>
+
+              <!-- Search/Filter Input -->
+              <div class="relative flex-1 md:w-56">
+                <input id="radar-search-input" type="text" placeholder="Search trending..." 
+                  class="w-full glass-input rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 outline-none">
+                <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Trending Topics Cards Grid -->
+          <div id="radar-cards-grid" class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Dynamically rendered trending cards -->
+          </div>
+
+          <!-- Empty State -->
+          <div id="radar-empty-state" class="hidden py-12 text-center text-slate-500 text-xs">
+            No trending topics match your current filters.
+          </div>
+
+        </section>
+
+
         <!-- ============================================== -->
         <!-- BLOG POSTS SECTION                             -->
         <!-- ============================================== -->

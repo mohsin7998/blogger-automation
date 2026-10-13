@@ -1,3 +1,24 @@
+
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+import {
+  TRENDING_TECH_CATALOG,
+  checkTopicOverlap,
+  getSelectedTopicIds,
+  selectTopic,
+  unselectTopic,
+  toggleTopicSelection,
+  getExistingBlogTopics
+} from "./trending-topics.js";
+
 ﻿/**
  * Engineer'sSideCorner - Firebase Admin Portal
  * Web SDK v10 Modular & Resilient Blogger Feed
@@ -376,6 +397,7 @@ async function loadBlogData() {
   statPostsCount.textContent = `${allBlogPosts.length} Posts`;
   postsBadgeCount.textContent = allBlogPosts.length;
   filterAndRenderPosts();
+    renderTrendingRadar();
   postsLoader.classList.add("hidden");
 
   try {
@@ -394,6 +416,7 @@ async function loadBlogData() {
       statPostsCount.textContent = `${result.total} Posts`;
       postsBadgeCount.textContent = result.total;
       filterAndRenderPosts();
+    renderTrendingRadar();
     }
   } catch (error) {
     console.warn("Live feed sync fallback to cache:", error);
@@ -401,6 +424,7 @@ async function loadBlogData() {
     statPostsCount.textContent = `${allBlogPosts.length} Posts`;
     postsBadgeCount.textContent = allBlogPosts.length;
     filterAndRenderPosts();
+    renderTrendingRadar();
   } finally {
     postsLoader.classList.add("hidden");
     refreshIcon.classList.remove("animate-spin");
@@ -539,5 +563,352 @@ if (isConfigured) {
   emailLoginForm.addEventListener("submit", (e) => {
     e.preventDefault();
     displayError("Firebase is not configured yet. Add your Firebase keys in public/app.js.");
+  });
+}
+
+
+// =========================================================================
+// TRENDING TOPICS RADAR CONTROLLER
+// =========================================================================
+let activeCategoryFilter = "all";
+let radarSearchQuery = "";
+let hideCoveredTopics = true;
+
+const radarStatTotal = document.getElementById("radar-stat-total");
+const radarStatFresh = document.getElementById("radar-stat-fresh");
+const radarStatCovered = document.getElementById("radar-stat-covered");
+const radarStatSelected = document.getElementById("radar-stat-selected");
+const existingTopicsCloud = document.getElementById("existing-topics-cloud");
+const existingTopicsCount = document.getElementById("existing-topics-count");
+const radarCardsGrid = document.getElementById("radar-cards-grid");
+const radarEmptyState = document.getElementById("radar-empty-state");
+const toggleHideCovered = document.getElementById("toggle-hide-covered");
+const radarSearchInput = document.getElementById("radar-search-input");
+const radarCategoryPills = document.getElementById("radar-category-pills");
+const selectedTopicQueueBox = document.getElementById("selected-topic-queue-box");
+const selectedQueueBadge = document.getElementById("selected-queue-badge");
+const selectedTopicDetails = document.getElementById("selected-topic-details");
+const btnCopyTopicPrompt = document.getElementById("btn-copy-topic-prompt");
+const btnClearQueue = document.getElementById("btn-clear-queue");
+
+function renderExistingTopicsCloud() {
+  if (!existingTopicsCloud) return;
+  const topics = getExistingBlogTopics(allBlogPosts);
+  existingTopicsCloud.innerHTML = "";
+  
+  if (topics.length === 0) {
+    existingTopicsCloud.innerHTML = `<span class="text-slate-500 italic">No topic labels detected yet.</span>`;
+    if (existingTopicsCount) existingTopicsCount.textContent = "0 Labels";
+    return;
+  }
+
+  if (existingTopicsCount) existingTopicsCount.textContent = `${topics.length} Distinct Labels`;
+
+  topics.forEach(({ name, count }) => {
+    const pill = document.createElement("span");
+    pill.className = "px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-slate-300 font-medium flex items-center gap-1.5 hover:border-slate-500 transition-colors";
+    pill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span> ${escapeHtml(name)} <span class="text-[10px] text-slate-400 font-mono">(${count})</span>`;
+    existingTopicsCloud.appendChild(pill);
+  });
+}
+
+function renderSelectedQueueBox() {
+  if (!selectedTopicQueueBox) return;
+  const selectedIds = getSelectedTopicIds();
+  const selectedTopics = TRENDING_TECH_CATALOG.filter(t => selectedIds.includes(t.id));
+
+  if (selectedTopics.length === 0) {
+    selectedTopicQueueBox.classList.add("hidden");
+    return;
+  }
+
+  selectedTopicQueueBox.classList.remove("hidden");
+  if (selectedQueueBadge) selectedQueueBadge.textContent = `${selectedTopics.length} In Queue`;
+
+  const leadTopic = selectedTopics[0];
+  if (selectedTopicDetails) {
+    selectedTopicDetails.innerHTML = `
+      <div class="col-span-1 md:col-span-2 space-y-2">
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">${escapeHtml(leadTopic.category)}</span>
+          <span class="text-slate-400 font-mono text-[11px]">${escapeHtml(leadTopic.searchVolume)}</span>
+          <span class="text-emerald-400 font-mono text-[11px]">${escapeHtml(leadTopic.momentum)}</span>
+        </div>
+        <h6 class="text-sm font-bold text-white">${escapeHtml(leadTopic.title)}</h6>
+        <p class="text-slate-300 text-xs leading-relaxed">${escapeHtml(leadTopic.suggestedAngle)}</p>
+        
+        <div class="pt-2">
+          <span class="text-[11px] font-semibold text-indigo-300 block mb-1">Recommended Outline for Engineer'sSideCorner:</span>
+          <ul class="list-disc list-inside space-y-0.5 text-slate-300 text-[11px]">
+            ${leadTopic.outline.map(point => `<li>${escapeHtml(point)}</li>`).join("")}
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-span-1 p-3.5 rounded-xl bg-slate-950/60 border border-indigo-500/20 flex flex-col justify-between">
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">SEO Keywords for Blogger</span>
+          <div class="flex flex-wrap gap-1.5 mb-3">
+            ${leadTopic.keywords.map(kw => `<span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-300 text-[10px] font-mono">${escapeHtml(kw)}</span>`).join("")}
+          </div>
+        </div>
+        <button onclick="window.unselectTrendingTopic('${leadTopic.id}')" class="text-left text-[11px] text-rose-400 hover:text-rose-300 underline cursor-pointer mt-2">
+          Remove this topic from queue
+        </button>
+      </div>
+    `;
+  }
+}
+
+function renderTrendingRadar() {
+  if (!radarCardsGrid) return;
+
+  renderExistingTopicsCloud();
+  renderSelectedQueueBox();
+
+  const selectedIds = getSelectedTopicIds();
+  let freshCount = 0;
+  let coveredCount = 0;
+
+  // Process all topics with overlap detection against all published posts
+  const analyzedTopics = TRENDING_TECH_CATALOG.map(topic => {
+    const overlap = checkTopicOverlap(topic, allBlogPosts);
+    if (overlap.isCovered) {
+      coveredCount++;
+    } else {
+      freshCount++;
+    }
+    return {
+      ...topic,
+      isCovered: overlap.isCovered,
+      matchingPost: overlap.matchingPost,
+      overlapReason: overlap.reason,
+      isSelected: selectedIds.includes(topic.id)
+    };
+  });
+
+  // Update Stats
+  if (radarStatTotal) radarStatTotal.textContent = TRENDING_TECH_CATALOG.length;
+  if (radarStatFresh) radarStatFresh.textContent = freshCount;
+  if (radarStatCovered) radarStatCovered.textContent = coveredCount;
+  if (radarStatSelected) radarStatSelected.textContent = selectedIds.length;
+
+  // Filter topics
+  const query = (radarSearchQuery || "").toLowerCase().trim();
+  const filtered = analyzedTopics.filter(topic => {
+    // Category filter
+    if (activeCategoryFilter !== "all" && topic.category !== activeCategoryFilter) {
+      return false;
+    }
+    // Hide covered toggle
+    if (hideCoveredTopics && topic.isCovered) {
+      return false;
+    }
+    // Search query
+    if (query) {
+      const matchTitle = topic.title.toLowerCase().includes(query);
+      const matchDesc = topic.summary.toLowerCase().includes(query);
+      const matchKeywords = topic.keywords.some(k => k.toLowerCase().includes(query));
+      return matchTitle || matchDesc || matchKeywords;
+    }
+    return true;
+  });
+
+  radarCardsGrid.innerHTML = "";
+
+  if (filtered.length === 0) {
+    if (radarEmptyState) radarEmptyState.classList.remove("hidden");
+    radarCardsGrid.classList.add("hidden");
+    return;
+  }
+
+  if (radarEmptyState) radarEmptyState.classList.add("hidden");
+  radarCardsGrid.classList.remove("hidden");
+
+  filtered.forEach(topic => {
+    const card = document.createElement("div");
+    card.className = `p-5 rounded-2xl glass-panel relative flex flex-col justify-between transition-all duration-300 hover:translate-y-[-2px] border ${
+      topic.isSelected 
+        ? "border-indigo-500 shadow-lg shadow-indigo-500/20 bg-indigo-950/20" 
+        : topic.isCovered 
+          ? "border-rose-900/40 bg-rose-950/10 opacity-75" 
+          : "border-slate-800/80 hover:border-slate-700"
+    }`;
+
+    // Status Header
+    let statusBadge = "";
+    if (topic.isCovered) {
+      statusBadge = `
+        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-300 border border-rose-500/20 flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> Already on Blog
+        </span>
+      `;
+    } else if (topic.isSelected) {
+      statusBadge = `
+        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1">
+          ✓ In Selection Queue
+        </span>
+      `;
+    } else {
+      statusBadge = `
+        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Fresh Opportunity
+        </span>
+      `;
+    }
+
+    // Action button
+    let actionButton = "";
+    if (topic.isCovered) {
+      actionButton = `
+        <div class="mt-4 pt-3 border-t border-slate-800/60">
+          <button disabled class="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-slate-900/80 text-slate-500 border border-slate-800 cursor-not-allowed flex items-center justify-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-rose-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <span>Covered (Cannot Select)</span>
+          </button>
+          <p class="text-[10px] text-rose-300/80 mt-1.5 leading-tight">
+            ${escapeHtml(topic.overlapReason)}
+          </p>
+        </div>
+      `;
+    } else if (topic.isSelected) {
+      actionButton = `
+        <div class="mt-4 pt-3 border-t border-slate-800/60 flex items-center gap-2">
+          <button onclick="window.unselectTrendingTopic('${topic.id}')" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md cursor-pointer flex items-center justify-center gap-1.5 transition-colors">
+            <span>✓ Selected (Click to Remove)</span>
+          </button>
+        </div>
+      `;
+    } else {
+      actionButton = `
+        <div class="mt-4 pt-3 border-t border-slate-800/60 flex items-center gap-2">
+          <button onclick="window.selectTrendingTopic('${topic.id}')" class="flex-1 btn-primary py-2 px-3 rounded-xl text-xs font-semibold text-white cursor-pointer flex items-center justify-center gap-1.5">
+            <span>Select for Next Post</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </button>
+        </div>
+      `;
+    }
+
+    card.innerHTML = `
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-2.5">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400 font-mono">${escapeHtml(topic.category)}</span>
+          ${statusBadge}
+        </div>
+
+        <h5 class="text-sm font-bold text-white leading-snug mb-2 hover:text-indigo-300 transition-colors">
+          ${escapeHtml(topic.title)}
+        </h5>
+
+        <p class="text-xs text-slate-400 leading-relaxed line-clamp-3 mb-3">
+          ${escapeHtml(topic.summary)}
+        </p>
+
+        <div class="flex flex-wrap items-center gap-2 text-[10px] font-mono text-slate-400 mb-2">
+          <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300">${escapeHtml(topic.searchVolume)}</span>
+          <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-emerald-400">${escapeHtml(topic.momentum)}</span>
+          <span class="px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 font-sans font-semibold">${escapeHtml(topic.badge)}</span>
+        </div>
+      </div>
+
+      ${actionButton}
+    `;
+
+    radarCardsGrid.appendChild(card);
+  });
+}
+
+// Global window functions for onclick handlers
+window.selectTrendingTopic = function(topicId) {
+  const res = selectTopic(topicId, allBlogPosts);
+  if (!res.success) {
+    alert(res.message);
+  }
+  renderTrendingRadar();
+};
+
+window.unselectTrendingTopic = function(topicId) {
+  unselectTopic(topicId);
+  renderTrendingRadar();
+};
+
+// Event Listeners for Trending Radar
+if (radarCategoryPills) {
+  radarCategoryPills.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-cat]");
+    if (!btn) return;
+    
+    radarCategoryPills.querySelectorAll("button").forEach(b => {
+      b.className = "radar-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/80 hover:bg-slate-700 text-slate-300 cursor-pointer transition-all";
+    });
+    
+    btn.className = "radar-pill active px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white cursor-pointer transition-all";
+    activeCategoryFilter = btn.getAttribute("data-cat");
+    renderTrendingRadar();
+  });
+}
+
+if (toggleHideCovered) {
+  toggleHideCovered.addEventListener("change", (e) => {
+    hideCoveredTopics = e.target.checked;
+    renderTrendingRadar();
+  });
+}
+
+if (radarSearchInput) {
+  radarSearchInput.addEventListener("input", (e) => {
+    radarSearchQuery = e.target.value;
+    renderTrendingRadar();
+  });
+}
+
+if (btnClearQueue) {
+  btnClearQueue.addEventListener("click", () => {
+    if (confirm("Clear all selected topics from the queue?")) {
+      localStorage.removeItem("esc_selected_trending_topics");
+      renderTrendingRadar();
+    }
+  });
+}
+
+if (btnCopyTopicPrompt) {
+  btnCopyTopicPrompt.addEventListener("click", () => {
+    const selectedIds = getSelectedTopicIds();
+    const selectedTopics = TRENDING_TECH_CATALOG.filter(t => selectedIds.includes(t.id));
+    if (selectedTopics.length === 0) return;
+    const t = selectedTopics[0];
+
+    const promptText = `Write a comprehensive, engaging, high-authority engineering blog post for "Engineer'sSideCorner" (https://engineersidecorner.blogspot.com/).
+
+Topic: ${t.title}
+Niche: ${t.category}
+Primary Target Audience: Software engineers, architects, AI practitioners, and technology builders.
+
+Key Angle:
+${t.suggestedAngle}
+
+Target SEO Keywords:
+${t.keywords.join(", ")}
+
+Required Article Outline:
+${t.outline.map((p, i) => `${i + 1}. ${p}`).join("\n")}
+
+Styling & Tone Requirements:
+- Tone: Highly informative, visionary yet grounded in concrete engineering details.
+- Include practical architectural explanations, trade-offs, and best practices.
+- Format with clean Markdown headers (H2, H3), bullet points, and code/architecture snippets where appropriate.`;
+
+    navigator.clipboard.writeText(promptText).then(() => {
+      const origText = btnCopyTopicPrompt.innerHTML;
+      btnCopyTopicPrompt.innerHTML = `<span class="text-emerald-300">✓ Prompt Copied to Clipboard!</span>`;
+      setTimeout(() => {
+        btnCopyTopicPrompt.innerHTML = origText;
+      }, 2500);
+    });
   });
 }

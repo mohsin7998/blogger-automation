@@ -8,6 +8,7 @@ Built to run entirely on **Firebase Hosting (Spark Free Tier)** with **Firebase 
 
 ## 🚀 Features
 
+- **Trending Topics Radar**: Curated tech & engineering topic recommendations with automated deduplication against existing published blog posts (prevents duplicate topic coverage).
 - **Zero-Cost Serverless Hosting**: Designed 100% for the Firebase Spark free plan.
 - **Secure Authentication**: Supports both **Google Sign-In** and **Email/Password** authentication.
 - **Clean Modern UI**: Dark-mode aesthetic featuring Tailwind CSS, glassmorphism, responsive grid layouts, and micro-interactions.
@@ -20,13 +21,18 @@ Built to run entirely on **Firebase Hosting (Spark Free Tier)** with **Firebase 
 
 ```text
 D:\blogger-automation\
-├── .firebaserc           # Firebase project alias mapping
-├── firebase.json         # Firebase Hosting configuration & SPA rewrite rules
-├── README.md             # Setup, local testing, and deployment guide
+├── .gitignore                    # Protects private credentials & environment configs
+├── firebase.json                 # Firebase Hosting configuration & SPA rewrite rules
+├── modern-tech-theme.xml         # Modern 4-column Blogger template XML with Dark Mode
+├── blogger-theme-enhancement.css # Modular CSS patches & widget cleanup
+├── README.md                     # Setup, local testing, and deployment guide
 └── public/
-    ├── index.html        # Main SPA interface (Tailwind CSS + Google Fonts)
-    ├── app.js            # Firebase App & Auth v10 modular logic
-    └── styles.css        # Glassmorphic dark styling & ambient animations
+    ├── index.html                # Main SPA interface (Tailwind CSS + Google Fonts)
+    ├── app.js                    # Admin controller & live Blogger feed integration
+    ├── trending-topics.js        # Trending topic radar, deduplication & queue logic
+    ├── firebase-config.example.js# Safe credential template for GitHub
+    ├── styles.css                # Glassmorphic dark styling & ambient animations
+    └── theme-preview.html        # Interactive theme preview with live articles
 ```
 
 ---

@@ -1,0 +1,452 @@
+﻿<link href='https://fonts.googleapis.com' rel='preconnect'/>
+<link crossorigin='anonymous' href='https://fonts.gstatic.com' rel='preconnect'/>
+<link href='https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap' rel='stylesheet' type='text/css'/>
+
+<style type='text/css'>
+/*<![CDATA[*/
+/* =========================================================================
+ * ENGINEER'S SIDE CORNER — MODERN HIGH-END TECH PUBLICATION REDESIGN
+ * ========================================================================= */
+
+:root {
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-light: rgba(79, 70, 229, 0.08);
+  --dark: #0f172a;
+  --slate-text: #334155;
+  --slate-muted: #64748b;
+  --bg-main: #f8fafc;
+  --card-bg: #ffffff;
+  --border-color: #e2e8f0;
+  --radius-card: 16px;
+  --radius-btn: 10px;
+  --radius-pill: 9999px;
+  --shadow-card: 0 4px 16px -2px rgba(15, 23, 42, 0.05), 0 2px 4px -1px rgba(15, 23, 42, 0.03);
+  --shadow-hover: 0 20px 32px -6px rgba(79, 70, 229, 0.12), 0 8px 16px -4px rgba(79, 70, 229, 0.06);
+}
+
+/* 1. Global Page Background & Canvas */
+body, body.home, body.item, body.index {
+  background: var(--bg-main) !important;
+  color: var(--slate-text) !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-size: 15px !important;
+  line-height: 1.7 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+#outer-wrapper {
+  background: transparent !important;
+  box-shadow: none !important;
+  max-width: 1220px !important;
+  margin: 0 auto !important;
+}
+
+/* 2. Header & Branding (Fixing Title Wrap & Floating) */
+#header-wrap {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03) !important;
+  height: auto !important;
+  padding: 12px 0 !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1000 !important;
+}
+
+#header-wrap .container.row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+  padding: 0 24px !important;
+  box-sizing: border-box !important;
+}
+
+.header-logo, .main-logo {
+  float: none !important;
+  width: auto !important;
+  max-width: none !important;
+  max-height: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.main-logo h1, 
+.main-logo h1 a {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 24px !important;
+  letter-spacing: -0.03em !important;
+  white-space: nowrap !important;
+  color: var(--dark) !important;
+  background: linear-gradient(135deg, #0f172a 20%, #4f46e5 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  line-height: 1.2 !important;
+  margin: 0 !important;
+}
+
+.main-logo p {
+  display: block !important;
+  font-size: 11.5px !important;
+  color: var(--slate-muted) !important;
+  margin: 2px 0 0 0 !important;
+  font-weight: 500 !important;
+  max-width: 480px !important;
+  line-height: 1.35 !important;
+}
+
+.header-menu {
+  float: none !important;
+  margin-left: auto !important;
+  margin-right: 20px !important;
+}
+
+#main-menu {
+  height: auto !important;
+}
+
+#main-menu ul#main-menu-nav {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+#main-menu ul#main-menu-nav > li {
+  float: none !important;
+}
+
+#main-menu ul#main-menu-nav > li > a {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  color: var(--slate-text) !important;
+  line-height: normal !important;
+  padding: 8px 14px !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+#main-menu ul#main-menu-nav > li > a:hover {
+  background: var(--primary-light) !important;
+  color: var(--primary) !important;
+}
+
+/* 3. Modern Content Layout (Flexbox Instead of Floats) */
+#content-wrapper {
+  margin: 36px auto !important;
+  padding: 0 20px !important;
+}
+
+#content-wrapper > .container {
+  display: flex !important;
+  gap: 36px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+#main-wrapper {
+  flex: 1 1 0% !important;
+  width: auto !important;
+  float: none !important;
+  overflow: visible !important;
+}
+
+#sidebar-wrapper {
+  width: 340px !important;
+  flex-shrink: 0 !important;
+  float: none !important;
+  overflow: visible !important;
+}
+
+/* 4. Article Post Cards (Interactive Modern Elevation) */
+.blog-posts {
+  border: none !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+.index-post {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--radius-card) !important;
+  box-shadow: var(--shadow-card) !important;
+  margin: 0 0 26px 0 !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+  transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.index-post:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: var(--shadow-hover) !important;
+  border-color: #cbd5e1 !important;
+}
+
+.index-post-inside-wrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 24px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.index-post .post-image-wrap {
+  width: 250px !important;
+  height: 175px !important;
+  flex-shrink: 0 !important;
+  margin: 0 !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  position: relative !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+.index-post .post-image-wrap .post-image-link {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+}
+
+.index-post .post-thumb {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.index-post:hover .post-thumb {
+  transform: scale(1.06) !important;
+}
+
+.index-post .post-info-wrap {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+.index-post .post-info {
+  margin-bottom: 8px !important;
+}
+
+.index-post .post-info > h2 {
+  margin: 0 0 8px 0 !important;
+}
+
+.index-post .post-info > h2 > a {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  color: var(--dark) !important;
+  line-height: 1.35 !important;
+  letter-spacing: -0.015em !important;
+  transition: color 0.2s ease !important;
+  display: block !important;
+}
+
+.index-post .post-info > h2 > a:hover {
+  color: var(--primary) !important;
+}
+
+.index-post-footer {
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.post-meta {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  font-size: 12.5px !important;
+  color: var(--slate-muted) !important;
+  margin-bottom: 8px !important;
+}
+
+.post-snippet {
+  color: var(--slate-muted) !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  margin: 0 !important;
+}
+
+/* 5. Modern Pill Badges */
+.post-tag, a.post-tag {
+  background: var(--primary-light) !important;
+  color: var(--primary) !important;
+  border-radius: var(--radius-pill) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  padding: 3px 10px !important;
+  height: auto !important;
+  line-height: 1.4 !important;
+  text-transform: capitalize !important;
+  border: 1px solid rgba(79, 70, 229, 0.18) !important;
+  display: inline-block !important;
+}
+
+/* 6. Sidebar Modern Card Styling */
+.sidebar .widget {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--radius-card) !important;
+  box-shadow: var(--shadow-card) !important;
+  padding: 24px !important;
+  margin-bottom: 28px !important;
+}
+
+.sidebar .widget-title > h3 {
+  border-bottom: 2px solid var(--border-color) !important;
+  color: var(--dark) !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+  padding-bottom: 10px !important;
+  margin-bottom: 16px !important;
+  text-align: left !important;
+}
+
+/* Popular Posts Widget Elevation */
+.common-widget .PopularPosts .post {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding: 12px 0 !important;
+  border-top: 1px solid var(--border-color) !important;
+}
+
+.common-widget .PopularPosts .post-image-link {
+  width: 68px !important;
+  height: 60px !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+}
+
+.common-widget .PopularPosts .post-info .post-title a {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: var(--dark) !important;
+  line-height: 1.35 !important;
+}
+
+.common-widget .PopularPosts .post-info .post-title a:hover {
+  color: var(--primary) !important;
+}
+
+/* Categories Cloud Pills */
+.list-label li, .cloud-label li {
+  display: inline-block !important;
+  margin: 3px 4px !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.list-label li a, .cloud-label li a {
+  background: var(--bg-main) !important;
+  color: var(--slate-text) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--radius-pill) !important;
+  padding: 5px 13px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.list-label li a:hover, .cloud-label li a:hover {
+  background: var(--primary) !important;
+  color: #ffffff !important;
+  border-color: var(--primary) !important;
+}
+
+/* Hide Dead / Clutter Widgets */
+.FollowByEmail,
+.social-counter,
+.home-ad,
+.home-ad-top,
+#HTML1,
+#HTML6 {
+  display: none !important;
+}
+
+/* 7. Responsive Mobile Adjustments */
+@media (max-width: 900px) {
+  #content-wrapper > .container {
+    flex-direction: column !important;
+    gap: 28px !important;
+  }
+  #sidebar-wrapper {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 680px) {
+  #header-wrap .container.row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+  .header-menu {
+    margin-left: 0 !important;
+  }
+  .index-post-inside-wrap {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .index-post .post-image-wrap {
+    width: 100% !important;
+    height: 200px !important;
+  }
+}
+
+/* =========================================================================
+ * FOOTER & UNSTYLED ORPHAN WIDGET CLEANUP
+ * Removes legacy search, attribution, archive, and leftover widgets
+ * ========================================================================= */
+#main .widget:not(#Blog1),
+.widget.BlogSearch,
+.widget.Attribution,
+.widget.BlogArchive,
+.widget.ReportAbuse,
+.widget.Profile,
+.widget.LinkList:not(.nav-menu),
+.widget.ContactForm,
+.widget.HTML:not(#sidebar-ad),
+#BlogSearch1,
+#Attribution1,
+#BlogArchive1,
+#HTML21,
+#Label3,
+#ReportAbuse1,
+#Profile1,
+#LinkList70,
+#ContactForm1,
+#LinkList71,
+#LinkList74,
+#LinkList76,
+#Header1,
+.attribution,
+.quickedit {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/*]]>*/
+</style>

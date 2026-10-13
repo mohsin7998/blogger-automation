@@ -1,0 +1,34 @@
+# =========================================================================
+# GITIGNORE - SECRETS & ENVIRONMENT PROTECTION
+# =========================================================================
+
+# Firebase Secrets & Client Keys
+public/firebase-config.js
+.firebase/
+firebase-debug.log*
+.firebaserc
+
+# Environment Variables & Tokens
+.env
+.env.*
+*.local
+credentials.json
+service-account*.json
+*.pem
+*.key
+
+# Node Dependencies & Logs
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# System & IDE Artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Temp files
+*.tmp
+*.bak
